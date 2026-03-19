@@ -1,0 +1,8 @@
+{
+  "name": "17 march 0002 Banquet Management System adding for inventory",
+  "description": "A comprehensive SaaS platform for Indian banquet halls, featuring multi-tenancy, GST-ready invoicing, event scheduling, and advanced analytics for the wedding and events industry.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

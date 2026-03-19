@@ -1,0 +1,4 @@
+/node_modules
+/dist
+/firebase-admin.json
+/src/firebase-admin.json

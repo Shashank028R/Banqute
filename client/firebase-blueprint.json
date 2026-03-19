@@ -1,0 +1,62 @@
+
+{
+  "entities": {
+    "Organization": {
+      "title": "Organization",
+      "description": "Banquet hall organization settings and form schema",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "primary_color": { "type": "string" },
+        "secondary_color": { "type": "string" },
+        "tagline": { "type": "string" },
+        "address": { "type": "string" },
+        "gst_number": { "type": "string" },
+        "bookingFormSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "label": { "type": "string" },
+                    "type": { "type": "string" },
+                    "required": { "type": "boolean" },
+                    "options": { "type": "array", "items": { "type": "string" } },
+                    "hasComment": { "type": "boolean" },
+                    "conditionalVisibility": {
+                      "type": "object",
+                      "properties": {
+                        "fieldId": { "type": "string" },
+                        "value": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              "conditionalVisibility": {
+                "type": "object",
+                "properties": {
+                  "fieldId": { "type": "string" },
+                  "value": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/organizations/{orgId}": {
+      "schema": "Organization",
+      "description": "Organization settings"
+    }
+  }
+}
