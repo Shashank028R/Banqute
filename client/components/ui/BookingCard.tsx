@@ -21,6 +21,8 @@ interface BookingCardProps {
   onPrint?: (booking: Booking) => void;
   onView?: (booking: Booking, tab: 'details' | 'expenses' | 'accounts') => void;
   onPayment?: (booking: Booking) => void;
+  advanceAmount?: number;
+  expensesAmount?: number;
 }
 
 export const BookingCard: React.FC<BookingCardProps> = ({ 
@@ -29,11 +31,18 @@ export const BookingCard: React.FC<BookingCardProps> = ({
   secondaryColor, 
   onPrint,
   onView,
-  onPayment
+  onPayment,
+  advanceAmount,
+  expensesAmount
 }) => {
-  const advance = booking.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
-  const balance = booking.rate - advance;
-  const netProfit = booking.rate - booking.expenses;
+  const advance = advanceAmount !== undefined 
+    ? advanceAmount 
+    : (booking.payments?.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(booking.advance) || 0);
+  
+  const expenses = expensesAmount !== undefined ? expensesAmount : 0;
+  
+  const balance = (Number(booking.rate) || 0) - advance;
+  const netProfit = (Number(booking.rate) || 0) - expenses;
   
   const getTier = (amount: number) => {
     if (amount > 400000) return 'Diamond';
@@ -164,7 +173,7 @@ export const BookingCard: React.FC<BookingCardProps> = ({
           <div className="flex flex-col items-center">
             <Receipt size={12} className={isNight ? 'text-slate-500' : 'text-gray-400'} />
             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Expenses</p>
-            <p className="text-xs font-black text-rose-500 mt-0.5">{formatCurrency(booking.expenses)}</p>
+            <p className="text-xs font-black text-rose-500 mt-0.5">{formatCurrency(expenses)}</p>
           </div>
         </div>
         <div className="text-center">

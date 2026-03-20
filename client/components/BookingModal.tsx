@@ -221,7 +221,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, sea
                   <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Contact Number *</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <input type="tel" required pattern="[0-9]{10}" value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-sm font-medium" style={{ '--tw-ring-color': `${org.primary_color}50` } as React.CSSProperties} placeholder="10-digit number" />
+                    <input type="tel" required pattern="[0-9]{10}" maxLength={10} minLength={10} value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value.replace(/\\D/g, '').slice(0, 10)})} className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-sm font-medium" style={{ '--tw-ring-color': `${org.primary_color}50` } as React.CSSProperties} placeholder="10-digit number" />
                   </div>
                 </div>
                 <div>
@@ -526,7 +526,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, sea
               form="booking-form"
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-black transition-all shadow-lg active:scale-95 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: org.primary_color, boxShadow: `0 10px 20px -10px ${org.primary_color}80` }}
-              disabled={!formData.accepted_terms}
+              disabled={!formData.accepted_terms || formData.contact.length !== 10}
             >
               <CheckCircle2 size={18} /> Confirm Reservation
             </button>

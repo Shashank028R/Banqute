@@ -36,7 +36,9 @@ const ScrollableSection: React.FC<{
   onPrint?: (booking: Booking) => void;
   onView?: (booking: Booking, tab: 'details' | 'expenses' | 'accounts') => void;
   onPayment?: (booking: Booking) => void;
-}> = ({ title, count, icon: Icon, bookings, primaryColor, secondaryColor, onPrint, onView, onPayment }) => {
+  dbPayments?: Payment[];
+  dbExpenses?: Expense[];
+}> = ({ title, count, icon: Icon, bookings, primaryColor, secondaryColor, onPrint, onView, onPayment, dbPayments = [], dbExpenses = [] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -81,10 +83,23 @@ const ScrollableSection: React.FC<{
         className="flex gap-8 overflow-x-auto pb-10 pt-2 px-2 snap-x scrollbar-none no-scrollbar"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {bookings.map((booking) => (
+        {bookings.map((booking) => {
+          const bPayments = dbPayments.filter(p => p.bookingId === booking.id);
+          const advanceAmount = bPayments.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(booking.advance) || 0;
+          const bExpenses = dbExpenses.filter(e => e.bookingId === booking.id || e.category === 'Booking');
+          
+          let expensesAmount = 0;
+          if (booking.expenses) { expensesAmount = Number(booking.expenses); } // Fallback
+          bExpenses.forEach(e => {
+             if (e.bookingId === booking.id) expensesAmount += (Number(e.amount) || 0);
+          });
+
+          return (
           <div key={booking.id} className="snap-start shrink-0 w-[85vw] sm:w-[360px]">
             <BookingCard 
               booking={booking} 
+              advanceAmount={advanceAmount}
+              expensesAmount={expensesAmount}
               primaryColor={primaryColor} 
               secondaryColor={secondaryColor} 
               onPrint={onPrint}
@@ -92,7 +107,7 @@ const ScrollableSection: React.FC<{
               onPayment={onPayment}
             />
           </div>
-        ))}
+        )})}
         {bookings.length === 0 && (
           <div className="w-full flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-[3rem] border-4 border-dashed border-gray-100 text-gray-400">
             <Icon size={64} className="opacity-10 mb-4" />
@@ -136,13 +151,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
   // KPI Calculations
   const totalBookingsCount = filteredBookings.length;
   const upcomingEventsCount = filteredBookings.filter(b => b.status === 'Upcoming').length;
-  const totalRevenue = filteredBookings.reduce((sum, b) => sum + b.rate, 0);
-  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalRevenue = filteredBookings.reduce((sum, b) => sum + (Number(b.rate) || 0), 0);
+  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const pendingBalance = filteredBookings.reduce((sum, b) => {
     if (b.status === 'Upcoming') {
       const bPayments = dbPayments.filter(p => p.bookingId === b.id);
-      const advance = bPayments.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
-      return sum + (b.rate - advance);
+      const advance = bPayments.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || 0;
+      return sum + ((Number(b.rate) || 0) - advance);
     }
     return sum;
   }, 0);
@@ -230,6 +245,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
         count={recentBookings.length} 
         icon={History} 
         bookings={recentBookings} 
+        dbPayments={dbPayments}
+        dbExpenses={dbExpenses}
         primaryColor={org.primary_color} 
         secondaryColor={org.secondary_color}
         onPrint={handlePrint}
@@ -246,6 +263,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
         count={upcomingBookingsList.length} 
         icon={CalendarClock} 
         bookings={upcomingBookingsList} 
+        dbPayments={dbPayments}
+        dbExpenses={dbExpenses}
         primaryColor={org.primary_color} 
         secondaryColor={org.secondary_color}
         onPrint={handlePrint}
@@ -389,13 +408,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
       )}
 
       {printingBooking && (
-        <PrintableReservation 
-          formData={printingBooking} 
-          org={org}
-          subtotal={printingBooking.rate} // Simplified for existing bookings
-          totalRate={printingBooking.rate}
-          balanceDue={printingBooking.rate - (printingBooking.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0)}
-        />
+        (() => {
+          const bPayments = dbPayments.filter(p => p.bookingId === printingBooking.id);
+          const advance = bPayments.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(printingBooking.advance) || 0;
+          return (
+            <PrintableReservation 
+              formData={printingBooking} 
+              org={org}
+              subtotal={Number(printingBooking.rate) || 0} // Simplified for existing bookings
+              totalRate={Number(printingBooking.rate) || 0}
+              balanceDue={(Number(printingBooking.rate) || 0) - advance}
+              advancePaid={advance}
+            />
+          );
+        })()
       )}
     </div>
   );

@@ -18,8 +18,20 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [organization, setOrganization] = useState<Organization>(SAMPLE_ORGANIZATION);
-  const [isDark, setIsDark] = useState(false);
+  const [organization, setOrganization] = useState<Organization>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('app-cachedOrg');
+      if (cached) return JSON.parse(cached);
+    }
+    return SAMPLE_ORGANIZATION;
+  });
+  
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
@@ -69,7 +81,9 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setOrganization(docSnap.data() as Organization);
+        const data = docSnap.data() as Organization;
+        setOrganization(data);
+        localStorage.setItem('app-cachedOrg', JSON.stringify(data));
       } else {
         // Initialize with sample data if it doesn't exist
         // Note: This will fail if the user is not an admin

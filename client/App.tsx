@@ -14,8 +14,16 @@ import { Login } from './components/ui/Login';
 
 const AppContent: React.FC = () => {
   const { loading, user } = useOrganization();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedSeason, setSelectedSeason] = useState('All');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('app-activeTab') || 'dashboard');
+  const [selectedSeason, setSelectedSeason] = useState(() => localStorage.getItem('app-selectedSeason') || 'All');
+
+  React.useEffect(() => {
+    localStorage.setItem('app-activeTab', activeTab);
+  }, [activeTab]);
+
+  React.useEffect(() => {
+    localStorage.setItem('app-selectedSeason', selectedSeason);
+  }, [selectedSeason]);
 
   if (loading) {
     return (

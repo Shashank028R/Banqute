@@ -7,6 +7,7 @@ interface PrintableReservationProps {
   subtotal: number;
   totalRate: number;
   balanceDue: number;
+  advancePaid?: number;
 }
 
 export const PrintableReservation: React.FC<PrintableReservationProps> = ({ 
@@ -14,7 +15,8 @@ export const PrintableReservation: React.FC<PrintableReservationProps> = ({
   org, 
   subtotal, 
   totalRate, 
-  balanceDue 
+  balanceDue,
+  advancePaid
 }) => {
   // Helper to check if a value is "filled"
   const isFilled = (val: any) => {
@@ -36,7 +38,9 @@ export const PrintableReservation: React.FC<PrintableReservationProps> = ({
   const bankName = formData.bankName || formData.bank_name || '';
   const referenceNumber = formData.referenceNumber || formData.reference_number || '';
   const discount = formData.discount || 0;
-  const advancePayment = formData.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
+  const advancePayment = advancePaid !== undefined 
+    ? advancePaid 
+    : formData.payments?.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(formData.advance) || 0;
 
   // Group fields for printing
   const sections: { title: string; fields: { label: string; value: any }[] }[] = [];

@@ -45,10 +45,17 @@ const DetailedBookingRow: React.FC<{
   onView?: (booking: Booking, tab: 'details' | 'expenses' | 'accounts') => void;
   onPayment?: (booking: Booking) => void;
   onExpenses?: (booking: Booking) => void;
-}> = ({ booking, primaryColor, onPrint, onView, onPayment, onExpenses }) => {
-  const advance = booking.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
-  const balance = booking.rate - advance;
-  const netProfit = booking.rate - booking.expenses;
+  advanceAmount?: number;
+  expensesAmount?: number;
+}> = ({ booking, primaryColor, onPrint, onView, onPayment, onExpenses, advanceAmount, expensesAmount }) => {
+  const advance = advanceAmount !== undefined 
+    ? advanceAmount 
+    : (booking.payments?.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(booking.advance) || 0);
+  
+  const expenses = expensesAmount !== undefined ? expensesAmount : 0;
+  
+  const balance = (Number(booking.rate) || 0) - advance;
+  const netProfit = (Number(booking.rate) || 0) - expenses;
   
   const getStatusStyles = (status: BookingStatus) => {
     switch (status) {
@@ -181,10 +188,12 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
   const [detailsTab, setDetailsTab] = useState<'details' | 'accounts'>('details');
   const exportRef = useRef<HTMLDivElement>(null);
   const [dbBookings, setDbBookings] = useState<Booking[]>([]);
+  const [dbPayments, setDbPayments] = useState<any[]>([]);
+  const [dbExpenses, setDbExpenses] = useState<any[]>([]);
 
   const loadData = () => {
-    api.getBookings(org.id)
-      .then(setDbBookings)
+    Promise.all([api.getBookings(org.id), api.getExpenses(org.id), api.getPayments(org.id)])
+      .then(([b, e, p]) => { setDbBookings(b); setDbExpenses(e); setDbPayments(p); })
       .catch(console.error);
   };
 
@@ -436,13 +445,25 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
         </div>
       </div>
 
-      {/* Bookings Content */}
       <div className="space-y-4">
         {filteredBookings.length > 0 ? (
-          filteredBookings.map((booking) => (
+          filteredBookings.map((booking) => {
+            const bPayments = dbPayments.filter(p => p.bookingId === booking.id);
+            const advanceAmount = bPayments.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(booking.advance) || 0;
+            const bExpenses = dbExpenses.filter(e => e.bookingId === booking.id || e.category === 'Booking');
+            
+            let expensesAmount = 0;
+            if (booking.expenses) { expensesAmount = Number(booking.expenses); }
+            bExpenses.forEach(e => {
+               if (e.bookingId === booking.id) expensesAmount += (Number(e.amount) || 0);
+            });
+
+            return (
             <DetailedBookingRow 
               key={booking.id} 
               booking={booking} 
+              advanceAmount={advanceAmount}
+              expensesAmount={expensesAmount}
               primaryColor={org.primary_color} 
               onPrint={handlePrint}
               onView={(b, tab) => {
@@ -452,7 +473,7 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
               onPayment={(b) => setSelectedBookingForPayment(b)}
               onExpenses={(b) => setSelectedBookingForExpenses(b)}
             />
-          ))
+          )})
         ) : (
           <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 bg-white rounded-[3rem] border border-gray-50 shadow-inner">
              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-gray-200 border-2 border-dashed border-gray-100">
@@ -531,13 +552,20 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
       )}
 
       {printingBooking && (
-        <PrintableReservation 
-          formData={printingBooking} 
-          org={org}
-          subtotal={printingBooking.rate}
-          totalRate={printingBooking.rate}
-          balanceDue={printingBooking.rate - (printingBooking.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0)}
-        />
+        (() => {
+          const bPayments = dbPayments.filter(p => p.bookingId === printingBooking.id);
+          const advance = bPayments.reduce((s, p) => s + (p.type === 'Received' ? (Number(p.amount) || 0) : -(Number(p.amount) || 0)), 0) || Number(printingBooking.advance) || 0;
+          return (
+            <PrintableReservation 
+              formData={printingBooking} 
+              org={org}
+              subtotal={Number(printingBooking.rate) || 0}
+              totalRate={Number(printingBooking.rate) || 0}
+              balanceDue={(Number(printingBooking.rate) || 0) - advance}
+              advancePaid={advance}
+            />
+          );
+        })()
       )}
     </div>
   );

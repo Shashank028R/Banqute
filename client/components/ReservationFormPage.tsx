@@ -74,6 +74,11 @@ export const ReservationFormPage: React.FC<ReservationFormPageProps> = ({ onClos
       val = val.charAt(0).toUpperCase() + val.slice(1);
     }
     
+    // Validate phone number
+    if (name === 'contactNumber' && typeof val === 'string') {
+      val = val.replace(/\\D/g, '').slice(0, 10);
+    }
+
     // Prevent negative values for number inputs
     if (type === 'number') {
       const numVal = Number(value);
@@ -211,6 +216,7 @@ export const ReservationFormPage: React.FC<ReservationFormPageProps> = ({ onClos
   const isValid = Boolean(
     formData.clientName && 
     formData.contactNumber && 
+    formData.contactNumber.length === 10 &&
     formData.eventDate && 
     formData.shift && 
     formData.eventType && 
@@ -289,9 +295,13 @@ export const ReservationFormPage: React.FC<ReservationFormPageProps> = ({ onClos
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Contact Number *</label>
               <input 
-                type="text" 
+                type="tel" 
                 name="contactNumber"
                 placeholder="10-digit number"
+                maxLength={10}
+                minLength={10}
+                required
+                pattern="[0-9]{10}"
                 value={formData.contactNumber}
                 onChange={handleInputChange}
                 className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-base focus:ring-2 outline-none transition-all"
