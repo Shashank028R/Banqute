@@ -13,6 +13,28 @@
       }
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              pink: {
+                50: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
+                100: 'color-mix(in srgb, var(--brand-primary) 20%, transparent)',
+                200: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)',
+                300: 'color-mix(in srgb, var(--brand-primary) 40%, transparent)',
+                400: 'color-mix(in srgb, var(--brand-primary) 60%, transparent)',
+                500: 'var(--brand-primary)',
+                600: 'var(--brand-primary)',
+                700: 'color-mix(in srgb, var(--brand-primary) 20%, black)',
+                800: 'color-mix(in srgb, var(--brand-primary) 40%, black)',
+                900: 'var(--brand-secondary)',
+              }
+            }
+          }
+        }
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body {
@@ -170,14 +192,7 @@
         background: #64748b;
       }
       
-      /* Brand colors in dark mode */
-      html.dark [style*="--primary-brand"] {
-        --primary-brand: #f43f5e !important; /* Rose-500 for better visibility in dark mode */
-        --primary-brand-light: rgba(244, 63, 94, 0.15) !important;
-      }
-      html.dark [style*="--secondary-brand"] {
-        --secondary-brand: #4c0519 !important; /* Rose-950 */
-      }
+      /* Brand colors in dark mode respect user settings */
     </style>
   <script type="importmap">
 {

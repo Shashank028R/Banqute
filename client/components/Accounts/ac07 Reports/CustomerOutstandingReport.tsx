@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Users, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { customerOutstandingData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const CustomerOutstandingReport: React.FC = () => {
+export const CustomerOutstandingReport: React.FC = () => { 
+  const { customerOutstandingData } = useFinanceData();
   const totalOutstanding = customerOutstandingData.reduce((sum, item) => sum + item.balanceDue, 0);
 
   return (

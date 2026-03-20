@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, IndianRupee, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { profitLossData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const ProfitLossReport: React.FC = () => {
+export const ProfitLossReport: React.FC = () => { 
+  const { profitLossData } = useFinanceData();
   const totalRevenue = profitLossData.reduce((sum, item) => sum + item.revenue, 0);
   const totalExpenses = profitLossData.reduce((sum, item) => sum + item.expenses, 0);
   const netProfit = totalRevenue - totalExpenses;

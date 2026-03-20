@@ -113,9 +113,14 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Provide dark mode adjusted colors if needed, or just use the original
   const currentOrg = {
     ...organization,
-    primary_color: isDark ? '#f43f5e' : organization.primary_color, // Rose-500 for dark mode
-    secondary_color: isDark ? '#4c0519' : organization.secondary_color, // Rose-950 for dark mode
+    primary_color: organization.primary_color,
+    secondary_color: organization.secondary_color,
   };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--brand-primary', currentOrg.primary_color);
+    document.documentElement.style.setProperty('--brand-secondary', currentOrg.secondary_color);
+  }, [currentOrg.primary_color, currentOrg.secondary_color]);
 
   return (
     <OrganizationContext.Provider value={{ organization: currentOrg, updateOrganization, loading, user, login, logout }}>

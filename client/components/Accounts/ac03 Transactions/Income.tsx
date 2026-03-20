@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Eye, Edit2 } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { incomeTransactions } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 import { TransactionSummary } from './TransactionSummary';
 import { AddIncomeModal } from './AddIncomeModal';
 
-export const Income: React.FC = () => {
+export const Income: React.FC = () => { 
+  const { incomeTransactions } = useFinanceData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   return (

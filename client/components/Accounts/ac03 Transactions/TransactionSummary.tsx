@@ -1,9 +1,10 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, IndianRupee } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { summaryData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const TransactionSummary: React.FC = () => {
+export const TransactionSummary: React.FC = () => { 
+  const { summaryData } = useFinanceData();
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">

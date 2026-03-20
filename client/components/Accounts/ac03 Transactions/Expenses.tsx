@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Eye, Edit2 } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { expenseTransactions } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 import { TransactionSummary } from './TransactionSummary';
 import { AddExpenseModal } from './AddExpenseModal';
 
-export const Expenses: React.FC = () => {
+export const Expenses: React.FC = () => { 
+  const { expenseTransactions } = useFinanceData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'General' | 'Booking'>('General');
 

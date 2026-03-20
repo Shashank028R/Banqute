@@ -1,9 +1,10 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { formatCurrency } from '../../../lib/utils';
-import { revenueData, expenseData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const FinancialCharts: React.FC = () => {
+export const FinancialCharts: React.FC = () => { 
+  const { revenueData, expenseData } = useFinanceData();
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Revenue Chart */}

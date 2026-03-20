@@ -1,8 +1,9 @@
 import React from 'react';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
-import { alerts } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const FinancialAlerts: React.FC = () => {
+export const FinancialAlerts: React.FC = () => { 
+  const { alerts } = useFinanceData();
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col">
       <div className="p-6 border-b border-gray-100">

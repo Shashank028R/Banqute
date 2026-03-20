@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, User, CreditCard, IndianRupee } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { customerLedgerTransactions, customerLedgerSummary } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const CustomerLedger: React.FC = () => {
+export const CustomerLedger: React.FC = () => { 
+  const { customerLedgerTransactions, customerLedgerSummary } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}

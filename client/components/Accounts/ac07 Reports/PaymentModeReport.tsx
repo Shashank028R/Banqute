@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, CreditCard, PieChart } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { paymentModeData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const PaymentModeReport: React.FC = () => {
+export const PaymentModeReport: React.FC = () => { 
+  const { paymentModeData } = useFinanceData();
   const totalAmount = paymentModeData.reduce((sum, item) => sum + item.amount, 0);
 
   return (

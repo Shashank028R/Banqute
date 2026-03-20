@@ -1,8 +1,9 @@
 import React from 'react';
 import { formatCurrency } from '../../../lib/utils';
-import { recentTransactions } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const RecentTransactions: React.FC = () => {
+export const RecentTransactions: React.FC = () => { 
+  const { recentTransactions } = useFinanceData();
   return (
     <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">

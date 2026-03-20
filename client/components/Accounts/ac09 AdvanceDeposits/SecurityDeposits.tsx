@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Plus, ShieldCheck, Undo2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { securityDeposits, securityDepositsSummary } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const SecurityDeposits: React.FC = () => {
+export const SecurityDeposits: React.FC = () => { 
+  const { securityDeposits, securityDepositsSummary } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}

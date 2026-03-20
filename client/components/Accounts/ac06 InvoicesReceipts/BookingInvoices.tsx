@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Eye, MessageCircle } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { bookingInvoices } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const BookingInvoices: React.FC = () => {
+export const BookingInvoices: React.FC = () => { 
+  const { bookingInvoices } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Calendar, IndianRupee, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { monthlySummaryData, profitLossData, expenseCategoryData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-export const MonthlySummary: React.FC = () => {
+export const MonthlySummary: React.FC = () => { 
+  const { monthlySummaryData, profitLossData, expenseCategoryData } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}

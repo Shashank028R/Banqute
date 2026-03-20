@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, IndianRupee, PieChart, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { expenseData } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const ExpenseReport: React.FC = () => {
+export const ExpenseReport: React.FC = () => { 
+  const { expenseData } = useFinanceData();
   const totalExpenses = expenseData.reduce((sum, item) => sum + item.amount, 0);
 
   return (

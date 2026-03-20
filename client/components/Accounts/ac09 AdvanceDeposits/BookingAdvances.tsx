@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Plus, IndianRupee, Calendar, Users } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { bookingAdvances, bookingAdvancesSummary } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const BookingAdvances: React.FC = () => {
+export const BookingAdvances: React.FC = () => { 
+  const { bookingAdvances, bookingAdvancesSummary } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, Plus, Building2, Wallet, Landmark } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { companyTransactions, companySummary } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const CompanyAccount: React.FC = () => {
+export const CompanyAccount: React.FC = () => { 
+  const { companyTransactions, companySummary } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}

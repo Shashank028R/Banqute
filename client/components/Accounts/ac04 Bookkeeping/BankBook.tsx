@@ -1,9 +1,10 @@
 import React from 'react';
 import { Download, Printer, Filter, Search, TrendingUp, TrendingDown, Building2, IndianRupee } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
-import { bankBookTransactions, bankBookSummary } from './mockData';
+import { useFinanceData } from '../hooks/useFinanceData';
 
-export const BankBook: React.FC = () => {
+export const BankBook: React.FC = () => { 
+  const { bankBookTransactions, bankBookSummary } = useFinanceData();
   return (
     <div className="space-y-6 pb-8">
       {/* Summary Cards */}
