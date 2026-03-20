@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { BookingsService } from '../services/bookings.service';
+import { BookingsService } from './bookings.service';
 
 @Controller('api/bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
   @Get()
-  getBookings(@Query('tenant_id') tenantId: string) {
+  getBookings(@Query('tenantId') tenantId: string) {
     return this.bookingsService.getBookings(tenantId);
   }
 

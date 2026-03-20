@@ -182,10 +182,14 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
   const exportRef = useRef<HTMLDivElement>(null);
   const [dbBookings, setDbBookings] = useState<Booking[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     api.getBookings(org.id)
       .then(setDbBookings)
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    loadData();
   }, [org.id, season]);
   
   // Filter States
@@ -501,6 +505,7 @@ export const Bookings: React.FC<BookingsProps> = ({ season, onNewReservation }) 
         <PaymentModal 
           isOpen={!!selectedBookingForPayment}
           onClose={() => setSelectedBookingForPayment(null)}
+          onUpdate={loadData}
           booking={selectedBookingForPayment}
           primaryColor={org.primary_color}
         />

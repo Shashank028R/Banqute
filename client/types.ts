@@ -49,11 +49,16 @@ export interface TermsConfig {
 
 export interface Payment {
     id: string; 
+    bookingId?: string;
+    tenantId?: string;
     date: string; 
     amount: number; 
     method: PaymentMethod; 
     type: 'Received' | 'Reverted'; 
     notes?: string; 
+    bankName?: string;
+    paymentMedium?: string;
+    reference?: string;
     recordedBy?: string; 
     isReverted?: boolean; 
     revertedDate?: string; 

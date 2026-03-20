@@ -6,10 +6,13 @@ import {
 } from 'lucide-react';
 import { Booking } from '../../types';
 import { formatCurrency } from '../../lib/utils';
+import { api } from '../../services/api';
+import { useOrganization } from '../../contexts/OrganizationContext';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onUpdate?: () => void;
   booking: Booking;
   primaryColor: string;
 }
@@ -32,7 +35,7 @@ interface PaymentRecord {
   revertReason?: string;
 }
 
-export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, booking, primaryColor }) => {
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onUpdate, booking, primaryColor }) => {
   const [paymentMode, setPaymentMode] = useState<'Cash' | 'Bank/Online'>('Cash');
   const [amount, setAmount] = useState<string>('');
   const [bankName, setBankName] = useState<string>('');
@@ -47,31 +50,41 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, boo
   const [revertReason, setRevertReason] = useState<string>('Incorrect Amount');
   const [customRevertReason, setCustomRevertReason] = useState<string>('');
 
-  // Mocked history based on booking data
-  const [history, setHistory] = useState<PaymentRecord[]>([
-    {
-      id: 'PAY-001',
-      amount: booking.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0,
-      date: booking.created_at,
-      mode: 'Bank/Online',
-      bankName: 'HDFC Bank',
-      paymentMedium: 'UPI',
-      reference: 'BK-' + booking.id.substring(0, 4),
-      narration: 'Advance Payment',
-      status: 'Completed',
-      enteredBy: {
-        name: 'Akshit Sharma',
-        role: 'Administrator'
-      }
+  const { organization: org, user } = useOrganization();
+  const [isLoading, setIsLoading] = useState(false);
+  const [history, setHistory] = useState<PaymentRecord[]>([]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      api.getPayments(org.id).then(allPayments => {
+        const bookingPayments = allPayments.filter(p => p.bookingId === booking.id);
+        const records = bookingPayments.map(p => ({
+          id: p.id,
+          amount: p.amount,
+          date: p.date,
+          mode: p.method,
+          bankName: p.bankName || undefined,
+          paymentMedium: p.paymentMedium || undefined,
+          reference: p.reference || 'N/A',
+          narration: p.notes || 'Advance Payment',
+          status: p.type === 'Reverted' ? 'Reverted' : 'Completed',
+          enteredBy: { name: p.recordedBy || 'System', role: 'Administrator' },
+          revertedAt: p.revertedDate,
+          revertReason: p.revertReason
+        } as PaymentRecord));
+        setHistory(records);
+        setIsLoading(false);
+      }).catch(console.error);
     }
-  ]);
+  }, [isOpen, booking.id, org.id]);
 
   if (!isOpen) return null;
 
   const activeHistory = history.filter(p => p.status !== 'Reverted');
   const totalPaid = activeHistory.reduce((acc, curr) => acc + curr.amount, 0);
   const balance = booking.rate - totalPaid;
-  const paidPercentage = Math.min(Math.round((totalPaid / booking.rate) * 100), 100);
+  const paidPercentage = Math.min(Math.round((totalPaid / booking.rate) * 100) || 0, 100);
 
   const capitalizeFirstLetter = (val: string) => {
     if (val.length > 0) {
@@ -80,53 +93,90 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, boo
     return val;
   };
 
-  const handleAddPayment = (e: React.FormEvent) => {
+  const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = Number(amount);
-    if (!amount || isNaN(numAmount) || numAmount <= 0) return;
+    if (!amount || isNaN(numAmount) || numAmount <= 0 || isLoading) return;
 
     const finalNarration = narration === 'Custom' ? customNarration : narration;
 
-    const newPayment: PaymentRecord = {
-      id: `PAY-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+    const newPaymentData = {
+      bookingId: booking.id,
+      tenantId: org.id,
       amount: numAmount,
       date: new Date().toISOString(),
-      mode: paymentMode,
+      method: paymentMode,
+      type: 'Received',
       bankName: paymentMode === 'Bank/Online' ? bankName : undefined,
       paymentMedium: paymentMode === 'Bank/Online' ? paymentMedium : undefined,
       reference: reference || 'N/A',
-      narration: finalNarration,
-      status: 'Completed',
-      enteredBy: {
-        name: 'Akshit Sharma', // In a real app, this would come from auth context
-        role: 'Administrator'
-      }
+      notes: finalNarration,
+      recordedBy: user?.displayName || user?.email || 'Administrator'
     };
 
-    setHistory([...history, newPayment]);
-    setAmount('');
-    setReference('');
-    setBankName('');
-    setPaymentMedium('');
-    setNarration('Advance Payment');
-    setCustomNarration('');
+    setIsLoading(true);
+    try {
+      const saved = await api.createPayment(newPaymentData);
+      
+      const newRecord: PaymentRecord = {
+        id: saved.id,
+        amount: saved.amount,
+        date: saved.date,
+        mode: saved.method,
+        bankName: saved.bankName,
+        paymentMedium: saved.paymentMedium,
+        reference: saved.reference,
+        narration: saved.notes,
+        status: 'Completed',
+        enteredBy: { name: saved.recordedBy || 'System', role: 'Administrator' }
+      };
+
+      setHistory([...history, newRecord]);
+      setAmount('');
+      setReference('');
+      setBankName('');
+      setPaymentMedium('');
+      setNarration('Advance Payment');
+      setCustomNarration('');
+      onUpdate?.();
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleConfirmRevert = () => {
-    if (!revertingTransactionId) return;
+  const handleConfirmRevert = async () => {
+    if (!revertingTransactionId || isLoading) return;
     
     const finalReason = revertReason === 'Custom' ? customRevertReason : revertReason;
     
-    setHistory(history.map(p => p.id === revertingTransactionId ? { 
-      ...p, 
-      status: 'Reverted',
-      revertedAt: new Date().toISOString(),
-      revertReason: finalReason
-    } : p));
-    
-    setRevertingTransactionId(null);
-    setRevertReason('Incorrect Amount');
-    setCustomRevertReason('');
+    setIsLoading(true);
+    try {
+      await api.updatePayment(revertingTransactionId, { 
+        type: 'Reverted', 
+        revertReason: finalReason,
+        revertedDate: new Date().toISOString(),
+        recordedBy: user?.displayName || user?.email || 'Administrator'
+      });
+      
+      setHistory(history.map(p => p.id === revertingTransactionId ? { 
+        ...p, 
+        status: 'Reverted',
+        revertedAt: new Date().toISOString(),
+        revertReason: finalReason,
+        enteredBy: { name: user?.displayName || user?.email || 'System', role: 'Administrator' }
+      } : p));
+      
+      setRevertingTransactionId(null);
+      setRevertReason('Incorrect Amount');
+      setCustomRevertReason('');
+      onUpdate?.();
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getModeIcon = (mode: string) => {

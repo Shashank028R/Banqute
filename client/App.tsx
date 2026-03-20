@@ -15,7 +15,7 @@ import { Login } from './components/ui/Login';
 const AppContent: React.FC = () => {
   const { loading, user } = useOrganization();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedSeason, setSelectedSeason] = useState('2024-25');
+  const [selectedSeason, setSelectedSeason] = useState('All');
 
   if (loading) {
     return (

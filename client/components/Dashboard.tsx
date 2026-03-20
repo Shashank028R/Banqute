@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { formatCurrency, formatDate, isInSeason } from '../lib/utils';
-import { Booking, Expense } from '../types';
+import { Booking, Expense, Payment } from '../types';
 import { useOrganization } from '../contexts/OrganizationContext';
 
 import { BookingCard } from './ui/BookingCard';
@@ -117,11 +117,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
 
   const [dbBookings, setDbBookings] = useState<Booking[]>([]);
   const [dbExpenses, setDbExpenses] = useState<Expense[]>([]);
+  const [dbPayments, setDbPayments] = useState<Payment[]>([]);
+
+  const loadData = () => {
+    Promise.all([api.getBookings(org.id), api.getExpenses(org.id), api.getPayments(org.id)])
+      .then(([b, e, p]) => { setDbBookings(b); setDbExpenses(e); setDbPayments(p); })
+      .catch(console.error);
+  };
 
   useEffect(() => {
-    Promise.all([api.getBookings(org.id), api.getExpenses(org.id)])
-      .then(([b, e]) => { setDbBookings(b); setDbExpenses(e); })
-      .catch(console.error);
+    loadData();
   }, [org.id]);
 
   // Filter Data based on FY Season and Organization
@@ -135,7 +140,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   const pendingBalance = filteredBookings.reduce((sum, b) => {
     if (b.status === 'Upcoming') {
-      const advance = b.payments?.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
+      const bPayments = dbPayments.filter(p => p.bookingId === b.id);
+      const advance = bPayments.reduce((s, p) => s + (p.type === 'Received' ? p.amount : -p.amount), 0) || 0;
       return sum + (b.rate - advance);
     }
     return sum;
@@ -366,6 +372,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
         <PaymentModal 
           isOpen={!!selectedBookingForPayment}
           onClose={() => setSelectedBookingForPayment(null)}
+          onUpdate={loadData}
           booking={selectedBookingForPayment}
           primaryColor={org.primary_color}
         />
