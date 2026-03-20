@@ -80,7 +80,7 @@ const DetailedBookingRow: React.FC<{
             </div>
             <div className="min-w-0">
               <h4 className="font-black text-gray-900 leading-tight truncate">{booking.clientName}</h4>
-              <p className="text-[10px] font-black text-gray-400 mt-0.5 tracking-widest uppercase">{booking.id}</p>
+              <p className="text-[10px] font-black text-gray-400 mt-0.5 tracking-widest uppercase">{booking.bookingId || booking.id}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

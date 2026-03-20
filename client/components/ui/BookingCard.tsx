@@ -92,7 +92,7 @@ export const BookingCard: React.FC<BookingCardProps> = ({
             <p className={`text-[10px] font-black mt-1 uppercase tracking-widest border inline-block px-2 py-0.5 rounded-md truncate max-w-full ${
               isNight ? 'text-slate-400 bg-slate-900 border-slate-800' : 'text-gray-400 bg-white border-gray-100'
             }`}>
-              ({booking.id}) {isNight ? '🌙' : '☀️'}
+              ({booking.bookingId || booking.id}) {isNight ? '🌙' : '☀️'}
             </p>
           </div>
         </div>

@@ -229,8 +229,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ season, onNewReservation }
         </button>
       </div>
 
-      {/* Primary KPIs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+      {/* Primary KPIs Section */}
+      <div className="flex flex-wrap xl:flex-nowrap w-full gap-6">
         <StatCard title="Total Bookings" value={totalBookingsCount} icon={<LayoutDashboard size={20} className="text-blue-600" />} color="bg-blue-50" />
         <StatCard title="Today & Upcoming" value={upcomingEventsCount} icon={<Clock size={20} className="text-purple-600" />} color="bg-purple-50" />
         <StatCard title="Pending" value={formatCurrency(pendingBalance)} icon={<Banknote size={20} className="text-orange-600" />} color="bg-orange-50" />

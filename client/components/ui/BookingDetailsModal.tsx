@@ -35,7 +35,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-black text-gray-900 leading-tight">{booking.clientName}</h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">{booking.id}</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">{booking.bookingId || booking.id}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">

@@ -218,7 +218,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onU
                     </div>
                     <div>
                       <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">{booking.clientName}</h3>
-                      <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">BOOKING ID: {booking.id}</p>
+                      <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">BOOKING ID: {booking.bookingId || booking.id}</p>
                     </div>
                   </div>
                   
